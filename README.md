@@ -10,4 +10,4 @@ This project is meant to demonstrate a wide variety of RL algorithms in Grid Wor
 
 * **`agent_.py`and`grid_env.py`** - Defines different agents for different algorithms and grid world for traditional algorithms and DRL
 
-* ** `StoredTrainingData`** - Trained deep neural network and V, Q Tabs.
+* **`StoredTrainingData`** - Trained deep neural network and V, Q Tabs.
