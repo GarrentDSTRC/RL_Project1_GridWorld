@@ -6,6 +6,8 @@ import environment.grid_env as grid
 import numpy as np
 from matplotlib import pyplot as plt
 import agent.agent_DP_v as ag
+import os
+path="StoredTrainingData\\vtab_DP_v.npy"
 
 
 env=grid.GridEnv1()
@@ -20,7 +22,8 @@ for i in range(num_episodes):
     env.reset()
     e_return=0
     epsilon -= dicrease
-    agent.vtab=np.load("StoredTrainingData\\vtab_DP_v.npy")
+    if os.path.exists(path):
+        agent.vtab=np.load(path)
     for t in range(max_number_of_steps):
         env.render()
         chosenAction=agent.policyAction(env.state,epsilon)
@@ -38,7 +41,7 @@ for i in range(num_episodes):
     print('score:',e_return,'\n',i ,'episode\n value:',agent.vtab)
 
     allrewards=np.append(allrewards,e_return)
-    np.save("StoredTrainingData\\vtab_DP_v.npy",agent.vtab)
+    np.save(path,agent.vtab)
 
 
 env.close()

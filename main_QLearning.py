@@ -6,6 +6,7 @@ import environment.grid_env as grid
 import numpy as np
 from matplotlib import pyplot as plt
 import agent.agent_Q as ag
+import os
 
 
 env=grid.GridEnv1()
@@ -16,12 +17,14 @@ epsilon=0.8
 dicrease=0.01
 a=0.2   #LearningRate More cautious than model based
 allrewards=np.zeros(1)
+path="StoredTrainingData\\Qtab_Q.npy"
 
 for i in range(num_episodes):
     env.reset()
     e_return=0
     epsilon -= dicrease
-    #agent.Qtab=np.load("StoredTrainingData\\Qtab_Q.npy")
+    if os.path.exists(path):
+        agent.Qtab=np.load(path)
     for t in range(max_number_of_steps):
         env.render()
         chosenAction=agent.policyAction(env.state,epsilon)
@@ -44,7 +47,7 @@ for i in range(num_episodes):
     allrewards=np.append(allrewards,e_return)
 
 
-np.save("StoredTrainingData\\Qtab_Q.npy",agent.Qtab)
+np.save(path,agent.Qtab)
 env.close()
 x=np.asarray(range(len(allrewards)))
 fig=plt.plot(x,allrewards)
