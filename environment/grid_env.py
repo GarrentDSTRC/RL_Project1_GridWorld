@@ -41,50 +41,7 @@ class GridEnv1(gym.Env):
         self.viewer = None
         #self.state = 15
 
-    """
-    def _seed(self, seed=None):
-        self.np_random, seed = random.seeding.np_random(seed)
-        return [seed]
 
-    def getTerminal(self):
-        return self.terminate_states
-
-    def getGamma(self):
-        return self.gamma
-
-    def getStates(self):
-        return self.states
-
-    def getAction(self):
-        return self.actions
-
-    def getTerminate_states(self):
-        return self.terminate_states
-
-    def setAction(self, s):
-        self.state = s
-
-    def policyAction(self,epsilon):
-        actionSpace = [0, 1, 2, 3]
-        for i in range(self.size):
-            assume_nextstate = self.state + self.actions[i]  #boundery check
-            if (assume_nextstate not in self.states) or(i==2 and  self.state % self.size == 0) or (i == 3 and self.state % self.size == 3):
-                actionSpace.remove(i)
-        Vmax=-100
-
-        if random.random()<epsilon:
-            return random.choice(actionSpace)
-        else:
-            for i in actionSpace:
-                assume_nextstate = self.state + self.actions[i]
-                assume_reward=self.getReward(i)
-                Vmax2=assume_reward+self.gamma*self.vtab[assume_nextstate]
-                if Vmax2>Vmax:
-                    Vmax=Vmax2
-                    chosenAction=i
-
-            return chosenAction
-    """
     def getReward(self,action):  #这里给0123
         return self.rewards[action,self.state]
 

@@ -21,8 +21,6 @@ class agent_Q():
 
 
 
-    #def getReward(self,action):  #这里给0123
-        #return self.rewards[action,self.state]
 
     def policyAction(self,observe_state,epsilon):
         actionSpace = [0, 1, 2, 3]

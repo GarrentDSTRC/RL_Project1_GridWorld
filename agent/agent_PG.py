@@ -6,22 +6,7 @@ import torch.nn.functional as F
 
 class PolicyNet(nn.Module):
 
-    """
-    def __init__(self,n_states_num,n_actions_num,hidden_size):
-        super(PolicyNet, self).__init__()
-        self.data = [] #存储轨迹
-        #输入为长度为4的向量 输出为向左  向右两个动作
-        self.net = nn.Sequential(
-            nn.Linear(in_features=n_states_num, out_features=hidden_size, bias=False),
-            nn.ReLU(),
-            nn.Linear(in_features=hidden_size, out_features=n_actions_num, bias=False),
-            nn.Softmax(dim=1)
-        )
-    def forward(self, inputs):
-        # 状态输入s的shape为向量：[4]
-        x = self.net(inputs)
-        return x
-    """
+
     def __init__(self, n_states_num, n_actions_num, hidden_size):
         super(PolicyNet, self).__init__()
         self.data = []  # 存储轨迹
@@ -75,21 +60,12 @@ class PolicyGradient():
     def  choose_action(self,state):
         #将state转化成tensor 并且维度转化为[16]->[1,16]  unsqueeze(0)在第0个维度上田间
         s = torch.Tensor(state).unsqueeze(0)
-        prob = self.pi(s)  # 动作分布:[1,2]
-        # 从类别分布中采样1个动作, shape: [1] torch.log(prob), 1
+        prob = self.pi(s)  # 动作分布:
+        # 从类别分布中采样1个动作
         m = torch.distributions.Categorical(prob)  # 生成分布
         action = m.sample()
         return action.item() , m.log_prob(action)
 
-    def choose_action2(self, state):
-        # 将state转化成tensor 并且维度转化为[4]->[1,4]  unsqueeze(0)在第0个维度上田间
-        s = torch.Tensor(state).unsqueeze(0)
-        prob = self.pi(s)  # 动作分布:[1,2]
-        # 从类别分布中采样1个动作, shape: [1] torch.log(prob), 1
-        action =np.random.choice(range(prob.shape[1]),size=1,p = prob.view(-1).detach().numpy())[0]
-        action = int(action)
-        #print(torch.log(prob[0][action]).unsqueeze(0))
-        return action,torch.log(prob[0][action]).unsqueeze(0)
 
     def plot_cost(self):
         import matplotlib.pyplot as plt
@@ -108,22 +84,10 @@ class agent_PG():
 
         self.size = 4
 
-
-
-        #self.vtab = np.zeros([16, ], dtype=float)
-        #self.Qtab=np.zeros([self.size,len(self.states)],dtype=float)
-
-        #self.states.remove(6)
-        #self.states.remove(9)
-        #self.states.remove(8)
         self.gamma = 0.8  # 折扣因子
 
         self.PG=PolicyGradient(len(self.states),self.size)
 
-
-
-    #def getReward(self,action):  #这里给0123
-        #return self.rewards[action,self.state]
 
     def policyAction(self,observe_state):
         self.state=observe_state
