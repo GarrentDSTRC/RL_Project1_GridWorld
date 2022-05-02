@@ -25,11 +25,9 @@ class GridEnv1(gym.Env):
 
         self.size = 4
 
-
         self.rewards =np.ones([self.size,len(self.states)],dtype = int)*-1  # 回报的数据结构为np
         self.rewards[1,0]=100
         self.rewards[2,5]=100
-
 
         self.states.remove(6)
         self.states.remove(9)

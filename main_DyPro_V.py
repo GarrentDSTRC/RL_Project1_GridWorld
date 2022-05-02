@@ -26,19 +26,22 @@ for i in range(num_episodes):
         agent.vtab=np.load(path)
     for t in range(max_number_of_steps):
         env.render()
-        chosenAction=agent.policyAction(env.state,epsilon)
+        #chosenAction=agent.policyAction(env.state,epsilon)
+        chosenAction=agent.deterministicPolicy(env.state,epsilon)
         nextstate, reward, Terminal=env.step(chosenAction)
 
         agent.vtab[env.state]=reward+agent.gamma*agent.vtab[nextstate]  #Dynamic Programming -Value iterations
 
         env.state=nextstate
-        e_return+=reward
+        if agent.count >= 8:
+            e_return+=reward*agent.gamma**(agent.count-8)
+        else: e_return+=reward*agent.gamma**agent.count
         if Terminal==True:
             break
 
-        time.sleep(0.02)
+        time.sleep(0.5)
 
-    print('score:',e_return,'\n',i ,'episode\n value:',agent.vtab)
+    print('DiscountedReturn:',e_return,'\n',i ,'episode\n value:',agent.vtab)
 
     allrewards=np.append(allrewards,e_return)
     np.save(path,agent.vtab)

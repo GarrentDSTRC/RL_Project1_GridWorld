@@ -21,8 +21,7 @@ class agent_DP_V():
         self.vtab = np.zeros([16, ], dtype=float)
 
         self.gamma = 0.8  # 折扣因子
-
-
+        self.count=-1
 
     def getReward(self,action):  #这里给0123
         return self.rewards[action,self.state]
@@ -49,3 +48,20 @@ class agent_DP_V():
                     chosenAction=i
 
             return chosenAction
+
+
+    def deterministicPolicy(self, observe_state, epsilon):
+
+        actionSpace = [0, 1, 2, 3]
+        self.state = observe_state
+        action1=[0,0,0,2,2,2,1,0]
+        action2=[0,0,0,2,2,1,2,0]
+        self.count+=1
+
+        if self.count==16:
+            self.count=0
+        elif self.count>=8:
+            return action1[self.count-8]
+        return action2[self.count]
+
+
