@@ -6,9 +6,9 @@ class agent_DP_V():
 
     def __init__(self):
         self.states = list(range(16))  # 状态空间 0-15
-        self.actions = [-4, 4, -1, 1]  # 上下左右
+        self.actions = [-4, 4, -1, 1 ,0]  # 上下左右
 
-        self.size = 4
+        self.size = 5
 
         self.rewards = np.ones([self.size, len(self.states)], dtype=int) * -1;  # 回报的数据结构为np
         self.rewards[1, 0] = 100
@@ -27,7 +27,7 @@ class agent_DP_V():
         return self.rewards[action,self.state]
 
     def policyAction(self,observe_state,epsilon):
-        actionSpace = [0, 1, 2, 3]
+        actionSpace = [0, 1, 2, 3, 4]
         self.state=observe_state
 
         for i in range(self.size):
@@ -50,18 +50,24 @@ class agent_DP_V():
             return chosenAction
 
 
-    def deterministicPolicy(self, observe_state, epsilon):
+    def deterministicPolicy(self, observe_state,policy):
 
-        actionSpace = [0, 1, 2, 3]
+        d={"上":0 ,"下":1 ,"左":2 ,"右":3 ,"不动":4}
+
+        actionSpace = [0, 1, 2, 3, 4]
         self.state = observe_state
-        action1=[0,0,0,2,2,2,1,0]
-        action2=[0,0,0,2,2,1,2,0]
-        self.count+=1
-
-        if self.count==16:
-            self.count=0
-        elif self.count>=8:
-            return action1[self.count-8]
-        return action2[self.count]
+        s_a_tab_p2=np.asarray([d['下'],d['左'],d['左'],d['左'],
+                               d['不动'],d['上'],-1, d['上'],
+                               -1,-1,d['右'],d['上'],
+                               d['右'],d['右'],d['右'],d['上'],
+                                ])
+        s_a_tab_p1 = np.asarray([d['右'],d['下'],d['左'],d['左'],
+                                 d['不动'],d['左'],-1, d['上'],
+                                 -1, -1, d['右'], d['上'],
+                                 d['右'], d['右'],d['上'], d['左'],
+                                 ])
+        if policy==1:
+            return s_a_tab_p1[self.state]
+        else: return s_a_tab_p2[self.state]
 
 
