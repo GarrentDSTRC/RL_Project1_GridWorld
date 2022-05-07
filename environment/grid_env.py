@@ -40,22 +40,23 @@ class GridEnv1(gym.Env):
         #self.state = 15
 
 
-    def getReward(self,action):  #这里给0123
+    def getReward(self,action):  #这里给01234
         return self.rewards[action,self.state]
 
-    def step(self,action):             #action 0123
+    def step(self,action):             #action 01234
         # 系统当前状态
         state = self.state
 
 
         if self.terminate_states[state]:
-             return state, 0, True
-        else: return state + self.actions[action], self.getReward(action),False
+             return state, self.getReward(action), True
+        else:
+            return state + self.actions[action], self.getReward(action),False
 
 
     def reset(self):
         while 1:
-            state = int(random.random() * len(self.states))
+            state = int(random.random() * 16)
             if state in self.states:
                 break
         self.state=state

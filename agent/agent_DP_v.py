@@ -54,7 +54,6 @@ class agent_DP_V():
 
         d={"上":0 ,"下":1 ,"左":2 ,"右":3 ,"不动":4}
 
-        actionSpace = [0, 1, 2, 3, 4]
         self.state = observe_state
         s_a_tab_p2=np.asarray([d['下'],d['左'],d['左'],d['左'],
                                d['不动'],d['上'],-1, d['上'],
