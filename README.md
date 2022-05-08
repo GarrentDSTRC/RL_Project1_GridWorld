@@ -12,16 +12,6 @@ This project is meant to demonstrate a wide variety of RL algorithms in Grid Wor
 
 * **`StoredTrainingData`** - Trained deep neural network and V, Q Tabs.
 
-## For assignment 1 
-Include main_DyPro-v.py,  Agent_DP_V.py, grid_DP_v.py.
-
-To see the two derterministic policy, 
-
-Run main_DyPro-v.py with
-```csharp
-#chosenAction=agent.policyAction(env.state,epsilon)
-chosenAction=agent.deterministicPolicy(env.state,epsilon)
-```
 
 ## For assignment 3
 Include main_DyPro-v.py,  Agent_DP_V.py, grid_DP_v.py；
