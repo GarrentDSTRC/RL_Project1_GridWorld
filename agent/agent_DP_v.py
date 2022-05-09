@@ -6,7 +6,7 @@ class agent_DP_V():
 
     def __init__(self):
         self.states = list(range(16))  # 状态空间 0-15
-        self.actions = [-4, 4, -1, 1]  # 上下左右
+        self.actions = [-4, 4, -1, 1,0]  # 上下左右不动
 
         self.size = 4
 
@@ -23,11 +23,11 @@ class agent_DP_V():
         self.gamma = 0.8  # 折扣因子
         self.count=-1
 
-    def getReward(self,action):  #这里给0123
+    def getReward(self,action):  #这里给01234
         return self.rewards[action,self.state]
 
     def policyAction(self,observe_state,epsilon):
-        actionSpace = [0, 1, 2, 3]
+        actionSpace = [0, 1, 2, 3,4]
         self.state=observe_state
 
         for i in range(self.size):

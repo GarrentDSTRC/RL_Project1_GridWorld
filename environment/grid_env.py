@@ -20,10 +20,10 @@ class GridEnv1(gym.Env):
         self.terminate_states = np.zeros(len(self.states))  # 终止状态为np格式
         self.terminate_states[4] = 1
 
-        self.actions = [-4, 4, -1, 1]  #上下左右
+        self.actions = [-4, 4, -1, 1, 0]  #上下左右 不动
 
 
-        self.size = 4
+        self.size = 5
 
         self.rewards =np.ones([self.size,len(self.states)],dtype = int)*-1  # 回报的数据结构为np
         self.rewards[1,0]=100
@@ -40,7 +40,7 @@ class GridEnv1(gym.Env):
         #self.state = 15
 
 
-    def getReward(self,action):  #这里给0123
+    def getReward(self,action):  #这里给01234
         return self.rewards[action,self.state]
 
     def step(self,action):             #action 0123
