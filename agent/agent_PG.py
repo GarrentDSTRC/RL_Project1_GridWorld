@@ -21,9 +21,9 @@ class PolicyNet(nn.Module):
 
 class PolicyGradient():
     def __init__(self,n_states_num,n_actions_num,learning_rate=0.01,reward_decay=0.8 ):
-        #状态数   state是一个16维向量，分别是位置，速度，杆子的角度，加速度
+        #状态数   state是一个16维向量，
         self.n_states_num = n_states_num
-        #action是4维、离散，即上下左右
+        #action是5维、离散，即上下左右
         self.n_actions_num = n_actions_num
         #学习率
         self.lr = learning_rate
@@ -80,9 +80,9 @@ class agent_PG():
 
     def __init__(self):
         self.states = list(range(16))  # 状态空间 0-15
-        self.actions = [-4, 4, -1, 1]  # 上下左右
+        self.actions = [-4, 4, -1, 1,0]  # 上下左右
 
-        self.size = 4
+        self.size = 5
 
         self.gamma = 0.8  # 折扣因子
 

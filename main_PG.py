@@ -48,11 +48,11 @@ for i in range(num_episodes):
 
     allrewards=np.append(allrewards,e_return)
 
-torch.save(agent.PG.pi,"PG.pt")
+torch.save(agent.PG.pi,path)
 
 env.close()
 x=np.asarray(range(len(allrewards)))
 fig=plt.plot(x,allrewards)
-plt.savefig(path)
+plt.savefig("PG.png")
 plt.show()
 sys.exit()
