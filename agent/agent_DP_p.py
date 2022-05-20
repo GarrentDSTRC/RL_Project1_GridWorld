@@ -4,10 +4,10 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from replay_buffer import ReplayBuffer
-from PrioritizedBuffer import NaivePrioritizedBuffer as Pbuffer
+#from replay_buffer import ReplayBuffer
+from agent.PrioritizedBuffer import NaivePrioritizedBuffer as Pbuffer
 
-REPLAY_MEMORY = 50000 # number of previous transitions to remember
+REPLAY_MEMORY = 500 # number of previous transitions to remember
 BATCH_SIZE = 32 # size of minibatch
 
 class PolicyNet(nn.Module):
@@ -41,10 +41,8 @@ class Policy():
         self.optimizer = torch.optim.SGD(self.pi.parameters(), lr=learning_rate)
         # replaybuffer
         self.buffer = Pbuffer(REPLAY_MEMORY )
-    #存储轨迹数据
-    def put_data(self, item):
-        # 记录r,log_P(a|s)z
-        self.data.append(item)
+        self.cost_his = []
+
     def train_net(self,vtab):
         state, action, reward, next_state, done, indices, weights = self.buffer.sample(BATCH_SIZE)
 
@@ -55,43 +53,47 @@ class Policy():
         done = torch.FloatTensor(done)
         weights = torch.FloatTensor(weights)
 
-        for i in range(BATCH_SIZE):
-            a,b,pro=self.choose_action(state[i])
-            loss=torch.log(pro[action[i]])*next_state[i]
-
-
-
-
-
-
-
-
-
-
-        # 计算梯度并更新策略网络参数。tape为梯度记录器
-        R = 0  # 终结状态的初始回报为0
         policy_loss = []
-        for r, log_prob in self.data[::-1]:  # 逆序取
-            R = r + self.gamma * R  # 计算每个时间戳上的回报
-            # 每个时间戳都计算一次梯度
-            loss = -log_prob * R
-            policy_loss.append(loss)
+
+        #losssum=torch.tensor(0.,requires_grad=True)
+
+        for i in range(BATCH_SIZE):
+            act,log_pro_act,pro=self.choose_action(state[i])
+
+            Advantage=float((reward[i]+self.gamma*vtab[int(next_state[i])])-vtab[int(state[i])])
+            loss=-torch.log(pro[0,action[i]])*Advantage*weights[i]
+
+            #loss.backward(retain_graph=True)
+            policy_loss.append(loss.unsqueeze(0))
+
         self.optimizer.zero_grad()
-        policy_loss = torch.cat(policy_loss).sum()  # 求和
-        #反向传播
-        policy_loss.backward()
+
+        policy_loss1=torch.cat(policy_loss)
+
+        prios=torch.atan(policy_loss1)+1.58
+        self.buffer.update_priorities(indices, prios.data.cpu().numpy())
+
+        policy_loss2 = policy_loss1.sum()  # 求和
+
+
+        # 反向传播
+        with torch.autograd.set_detect_anomaly(True):
+         policy_loss2.backward(retain_graph=True)
         self.optimizer.step()
-        self.cost_his.append(policy_loss.item())
-        self.data = []  # 清空轨迹
+        self.cost_his.append(policy_loss2.item())
+
     #将状态传入神经网络 根据概率选择动作
     def  choose_action(self,state):
-        states=torch.zeros(len(state),16)
-        for i in range(len(state)):
-            states[i,state[i]]=1
+        state = torch.as_tensor(state)
+        if state.dim()!=0:
+            states=torch.zeros(state.size,16)  #(*,16)
+            for i in range(state.size):
+                states[state[i],i]=1
+        else: states=torch.zeros(1,16)
 
         #将state转化成tensor one-hot vector 并且维度转化为[16]->[1,16]  unsqueeze(0)在第0个维度上切片
-        s = torch.Tensor(states).unsqueeze(0)
-        prob = self.pi(s)  # 动作分布:
+        #s = torch.Tensor(states).unsqueeze(0)
+        prob = self.pi(states)  # 动作分布:
         # 从类别分布中采样1个动作
         m = torch.distributions.Categorical(prob)  # 生成分布
         action = m.sample()
@@ -124,11 +126,14 @@ class agent_DP_p():
         self.rewards[1, 0] = 100
         self.rewards[2, 5] = 100
 
+        self.terminate_states = np.zeros(len(self.states))  # 终止状态为np格式
+        self.terminate_states[4] = 1
+
         self.states.remove(6)
         self.states.remove(9)
         self.states.remove(8)
 
-        self.vtab = np.zeros([16, ], dtype=float)
+        self.vtab = torch.zeros([16], dtype=float,requires_grad=False)
 
         self.gamma = 0.8  # 折扣因子
 
@@ -140,23 +145,32 @@ class agent_DP_p():
 
         chosenAction,logpro,actionpro=self.Policy.choose_action(self.state)
 
-        #boundary check
-        for i in range(self.size):
-            assume_nextstate = self.state + self.actions[i]  #boundery check
-            if (assume_nextstate not in self.states) or(i==2 and  self.state % self.size == 0) or (i == 3 and self.state % self.size == 3):
-                actionSpace.remove(i)
-
-
         # value_improvement under  policy with stochastic action
-        assume_nextv=np.zeros(self.size)
-        assume_reward = np.zeros(self.size)
+        assume_nextv=torch.zeros(self.size)
+        assume_reward = torch.zeros(self.size)
         for i in actionSpace:
-            assume_nextv[i] = self.vtab[self.state + self.actions[i]]
-            assume_reward[i] = self.getReward(i)
+            as_n, Re,Ter=self.step(i)
+            assume_nextv[i] = self.vtab[as_n]
+            assume_reward[i] = Re
         # use stomastic action
-        self.vtab = np.sum(actionpro*(assume_reward + self.gamma * assume_nextv))
+        self.vtab[observe_state] = torch.sum(actionpro*(assume_reward + self.gamma * assume_nextv))
 
         return chosenAction, logpro
+
+    def step(self,action):             #action 0123
+        # 系统当前状态
+        state = self.state
+        as_n = self.state + self.actions[action]
+
+        if self.terminate_states[state]:
+            return state, 100, True
+
+        elif  ((as_n not in self.states))or\
+                (as_n ==6 or as_n== 8 or as_n== 9) or(action==2 and  self.state % self.size == 0) or (action == 3 and self.state % self.size == 3):
+
+            return state, -2, False
+        else:
+            return as_n, -1,False
 
 
     def save_r_log(self,reward,logpro):
