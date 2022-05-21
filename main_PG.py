@@ -34,7 +34,7 @@ for i in range(num_episodes):
         agent.save_r_log(reward,logpro)
 
 
-        env.state=nextstate
+
         e_return+=reward
         if Terminal==True:
             break

@@ -36,9 +36,7 @@ for i in range(num_episodes):
         prevstate=env.state
 
         nextstate, reward, Terminal=env.step(chosenAction)
-
-        agent.Policy.buffer.push(prevstate,chosenAction, reward, nextstate,Terminal)
-
+        agent.save_r_log(reward,logpro,chosenAction,prevstate)
 
         e_return+=reward
         if Terminal==True:
@@ -46,14 +44,14 @@ for i in range(num_episodes):
 
 
 
-    if i%4==0:
+    #if i%2==0:
         # policy improvement
-     agent.Policy.train_net(agent.vtab)
+    agent.Policy.train_net(agent.vtab,agent.qtab)
 
     if i % 29 == 0:
      print('score:',e_return,'\n',i ,'episode\n value:')
      print(agent.vtab)
-
+     print(agent.qtab)
      agent.Policy.plot_cost()
 
     allrewards=np.append(allrewards,e_return)

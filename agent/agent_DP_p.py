@@ -39,48 +39,28 @@ class Policy():
         self.pi = PolicyNet(n_states_num, n_actions_num, 128)
         #优化器
         self.optimizer = torch.optim.SGD(self.pi.parameters(), lr=learning_rate)
-        # replaybuffer
-        self.buffer = Pbuffer(REPLAY_MEMORY )
+
         self.cost_his = []
-
-    def train_net(self,vtab):
-        state, action, reward, next_state, done, indices, weights = self.buffer.sample(BATCH_SIZE)
-
-        state = torch.FloatTensor(np.float32(state))
-        next_state = torch.FloatTensor(np.float32(next_state))
-        action = torch.LongTensor(action)
-        reward = torch.FloatTensor(reward)
-        done = torch.FloatTensor(done)
-        weights = torch.FloatTensor(weights)
-
+        self.data = []
+    def train_net(self,vtab,qtab):
+        # 计算梯度并更新策略网络参数。tape为梯度记录器
+        R = 0  # 终结状态的初始回报为0
         policy_loss = []
+        for r, log_prob,choseA,s in self.data[::-1]:  # 逆序取
+            #R = r + self.gamma * R  # 计算每个时间戳上的回报
 
-        #losssum=torch.tensor(0.,requires_grad=True)
-
-        for i in range(BATCH_SIZE):
-            act,log_pro_act,pro=self.choose_action(state[i])
-
-            Advantage=float((reward[i]+self.gamma*vtab[int(next_state[i])])-vtab[int(state[i])])
-            loss=-torch.log(pro[0,action[i]])*Advantage*weights[i]
-
-            #loss.backward(retain_graph=True)
-            policy_loss.append(loss.unsqueeze(0))
+            # 每个时间戳都计算一次梯度
+            Advantage=qtab[int(s),int(choseA)]-vtab[int(s)]
+            loss = -log_prob * int(Advantage)
+            policy_loss.append(loss)
 
         self.optimizer.zero_grad()
-
-        policy_loss1=torch.cat(policy_loss)
-
-        prios=torch.atan(policy_loss1)+1.58
-        self.buffer.update_priorities(indices, prios.data.cpu().numpy())
-
-        policy_loss2 = policy_loss1.sum()  # 求和
-
-
+        policy_loss = torch.cat(policy_loss).sum()  # 求和
         # 反向传播
-        with torch.autograd.set_detect_anomaly(True):
-         policy_loss2.backward(retain_graph=True)
+        policy_loss.backward()
         self.optimizer.step()
-        self.cost_his.append(policy_loss2.item())
+        self.cost_his.append(policy_loss.item())
+        self.data = []  # 清空轨迹
 
     #将状态传入神经网络 根据概率选择动作
     def  choose_action(self,state):
@@ -89,7 +69,9 @@ class Policy():
             states=torch.zeros(state.size,16)  #(*,16)
             for i in range(state.size):
                 states[state[i],i]=1
-        else: states=torch.zeros(1,16)
+        else:
+            states=torch.zeros(1,16)
+            states[0,int(state)]=1
 
         #将state转化成tensor one-hot vector 并且维度转化为[16]->[1,16]  unsqueeze(0)在第0个维度上切片
         #s = torch.Tensor(states).unsqueeze(0)
@@ -99,13 +81,16 @@ class Policy():
         action = m.sample()
         return action.item() , m.log_prob(action), prob
 
-
     def plot_cost(self):
         import matplotlib.pyplot as plt
         plt.plot(np.arange(len(self.cost_his)), self.cost_his)
         plt.ylabel('Cost')
         plt.xlabel('training steps')
         plt.show()
+
+    def put_data(self, item):
+        # 记录r,log_P(a|s)z
+        self.data.append(item)
 
 
 
@@ -134,6 +119,7 @@ class agent_DP_p():
         self.states.remove(8)
 
         self.vtab = torch.zeros([16], dtype=float,requires_grad=False)
+        self.qtab = torch.zeros([16,5], dtype=float, requires_grad=False)
 
         self.gamma = 0.8  # 折扣因子
 
@@ -152,8 +138,10 @@ class agent_DP_p():
             as_n, Re,Ter=self.step(i)
             assume_nextv[i] = self.vtab[as_n]
             assume_reward[i] = Re
+
         # use stomastic action
         self.vtab[observe_state] = torch.sum(actionpro*(assume_reward + self.gamma * assume_nextv))
+        self.qtab[observe_state,int(chosenAction)]=assume_reward[int(chosenAction)]+self.gamma*assume_nextv[int(chosenAction)]
 
         return chosenAction, logpro
 
@@ -173,5 +161,5 @@ class agent_DP_p():
             return as_n, -1,False
 
 
-    def save_r_log(self,reward,logpro):
-        self.Policy.put_data([reward,logpro])
+    def save_r_log(self,reward,logpro,chosenAction,prevstate):
+        self.Policy.put_data([reward,logpro,chosenAction,prevstate])
