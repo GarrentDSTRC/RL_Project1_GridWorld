@@ -13,7 +13,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 env=grid.GridEnv1_nn()
 agent=ag.agent_DP_p()
-num_episodes = 300
+num_episodes = 200
 max_number_of_stepsv=100
 max_number_of_stepsp=100
 epsilon=0.8
