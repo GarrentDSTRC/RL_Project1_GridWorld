@@ -20,7 +20,7 @@ class GridEnv1_nn(gym.Env):
 
         self.terminate_states = np.zeros(len(self.states))  # 终止状态为np格式
         self.terminate_states[4] = 1
-        self.terminate_states[3] = 1
+        #self.terminate_states[3] = 1
 
         self.actions = [-4, 4, -1, 1, 0]  #上下左右不动
 
