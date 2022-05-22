@@ -48,7 +48,7 @@ class NaivePrioritizedBuffer(object):
         next_states = np.concatenate(batch[3])
         dones       = batch[4]
 
-        print(weights)
+        #print(weights)
 
         return states, actions, rewards, next_states, dones, indices, weights
 

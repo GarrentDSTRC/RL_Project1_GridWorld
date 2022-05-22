@@ -8,8 +8,8 @@ from agent.replay_buffer import ReplayBuffer
 from agent.PrioritizedBuffer import NaivePrioritizedBuffer as Pbuffer
 from agent.ou_noise import OUNoise
 
-REPLAY_MEMORY = 3000 # number of previous transitions to remember
-BATCH_SIZE = 60 # size of minibatch
+REPLAY_MEMORY = 100 # number of previous transitions to remember
+BATCH_SIZE = 100 # size of minibatch
 learning_rate=0.02
 soft_tau=0.1
 

@@ -20,6 +20,7 @@ class GridEnv1_nn(gym.Env):
 
         self.terminate_states = np.zeros(len(self.states))  # 终止状态为np格式
         self.terminate_states[4] = 1
+        self.terminate_states[3] = 1
 
         self.actions = [-4, 4, -1, 1, 0]  #上下左右不动
 
@@ -44,14 +45,15 @@ class GridEnv1_nn(gym.Env):
         state = self.state
         as_n = self.state + self.actions[action]
 
-        if self.terminate_states[state]:
-            self.state=state
-            return state, 100, True
-
-        elif  ((as_n not in self.states))or\
+        if  ((as_n not in self.states))or\
                 (as_n ==6 or as_n== 8 or as_n== 9) or(action==2 and  self.state % self.size == 0) or (action == 3 and self.state % self.size == 3) or action==4:
             self.state = state
             return state, -2, False
+
+        elif self.terminate_states[as_n]:
+            self.state=as_n
+            return as_n, 100, True
+
         else:
             self.state = as_n
             return as_n, -1,False

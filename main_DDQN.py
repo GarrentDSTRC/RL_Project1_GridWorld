@@ -13,7 +13,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 env=grid.GridEnv1_nn()
 agent=ag.agent_DDQN()
-num_episodes = 3000
+num_episodes = 300
 max_number_of_stepsv=100
 max_number_of_stepsp=100
 a=0.2   #LearningRate
@@ -49,18 +49,22 @@ for i in range(num_episodes):
     allrewards = np.append(allrewards, e_return)
 
     #if i%5==0 and agent.Policy.cbuffer.count()==agent.Policy.cbuffer.size():
-    if i % 5 == 0 and agent.Policy.buffer.__len__() > 0.1*agent.Policy.buffer.capacity:
+    if i % 1 == 0 and agent.Policy.buffer.__len__() >= 0.1*agent.Policy.buffer.capacity:
         # train and erase to ensure is experience is on-policy
         #agent.vtab=agent.Policy.train_DDPG_common_buffer(agent.vtab)
         #agent.Policy.cbuffer.erase()
         agent.Policy.train_DDQN_P_buffer()
+        #agent.Policy.compute_td_loss()
 
 
-    if i % 5 == 0:
+    if i % 10 == 0:
+        agent.Policy.copyTargetnetwork()
+
         print('score:',e_return,'\n',i ,'episode\n value:','ep',agent.epsilon)
         #for j in range(5):
             #for i in range(16):
-        print(float(agent.Policy.criticT.forward(0,1)),float(agent.Policy.critic.forward(5,2)),float(agent.Policy.criticT.forward(5,2)))
+        #print(float(agent.Policy.criticT.forward(0,1)),float(agent.Policy.critic.forward(5,2)),float(agent.Policy.criticT.forward(5,2)),float(agent.Policy.criticT.forward(15,0)))
+        print(agent.Policy.criticT.forward(15),agent.Policy.criticT.forward(15),agent.Policy.critic.forward(7),agent.Policy.criticT.forward(7))
         print('\n')
         #for target_param, param in zip(agent.Policy.criticT.parameters(),agent.Policy.critic.parameters()):
             #print(target_param,param)
