@@ -27,7 +27,7 @@ for i in range(num_episodes):
     e_return=0
     epsilon -= dicrease
     if os.path.exists(path):
-        agent.Policy.pi=torch.load(path)
+        agent.Policy.actor=torch.load(path)
 
     #policy evaluation
     for t in range(max_number_of_stepsv):
@@ -56,7 +56,7 @@ for i in range(num_episodes):
 
     allrewards=np.append(allrewards,e_return)
 
-torch.save(agent.Policy.pi,path)
+torch.save(agent.Policy.actor, path)
 
 env.close()
 x=np.asarray(range(len(allrewards)))
