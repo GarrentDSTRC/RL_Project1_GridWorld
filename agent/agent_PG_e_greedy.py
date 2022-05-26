@@ -4,6 +4,12 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+EPSILON=0.4
+ep_d=0.005
+Sigma=0.05
+
+#pip install pyglet -i https://pypi.tuna.tsinghua.edu.cn/simple
+
 class PolicyNet(nn.Module):
 
 
@@ -57,17 +63,30 @@ class PolicyGradient():
         self.cost_his.append(policy_loss.item())
         self.data = []  # 清空轨迹
     #将状态传入神经网络 根据概率选择动作
-    def  choose_action(self,state):
-        #将state转化成tensor 并且维度转化为[16]->[1,16]  unsqueeze(0)在第0个维度上田间
+
+
+    def choose_action_e_greedy(self, state):
+        # 将state转化成tensor 并且维度转化为[16]->[1,16]  unsqueeze(0)在第0个维度上田间
         s = torch.Tensor(state).unsqueeze(0)
         prob = self.pi(s)  # 动作分布:
+
+        global EPSILON
+
+        if random.random() < EPSILON:
+            sigma = Sigma
+            prob1=torch.tensor(prob)
+            for i in range(prob.shape[1]):
+                prob1[0,i]=prob[0,i]+ random.gauss(0, sigma)
+            prob2 = F.softmax(prob1,dim=1)
+            m = torch.distributions.Categorical(prob2)
         # 从类别分布中采样1个动作
-        m = torch.distributions.Categorical(prob)  # 生成分布
+        else:
+            m = torch.distributions.Categorical(prob)  # 生成分布
         action = m.sample()
 
-        return action.item() , m.log_prob(action)
+        EPSILON -= ep_d
 
-
+        return action.item(), m.log_prob(action)
 
     def plot_cost(self):
         import matplotlib.pyplot as plt
@@ -96,7 +115,7 @@ class agent_PG():
 
         state=torch.zeros(16)
         state[self.state]=1
-        chosenAction,logpro=self.PG.choose_action(state)
+        chosenAction,logpro=self.PG.choose_action_e_greedy(state)
 
         return chosenAction, logpro
     def save_r_log(self,reward,logpro):
