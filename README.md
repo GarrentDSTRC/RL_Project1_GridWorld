@@ -13,18 +13,20 @@ This project is meant to demonstrate a wide variety of RL algorithms in Grid Wor
 * **`StoredTrainingData`** - Trained deep neural network and V, Q Tabs.
 
 
-## For assignment 3
-Include main_DyPro-v.py,  Agent_DP_V.py, grid_DP_v.py；
+## For assignment 4
+Include main_PG.py,  agent_PG.py,agent_PG_e_greedy, grid_env_nn.py；
 
-To see Value iteration of Dynamic programming,
+To see MC Exploring Starts,
 
-Run main_DyPro-v.py with
+Run main_PG.py with
 ```csharp
-chosenAction=agent.policyAction(env.state,epsilon)
-#chosenAction=agent.deterministicPolicy(env.state,epsilon)
+#import agent.agent_PG as ag
+import agent.agent_PG_e_greedy as ag
 ```
-Include main_DyPro_P_A2C.py,  Agent_DP_p.py, grid_DP_v_nn.py；
+To see MC epsilon-greedy,
 
-To see Policy iteration of Dynamic programming,
-
-Run main_DyPro_P_A2C.py
+Run main_PG.py with
+```csharp
+import agent.agent_PG as ag
+#import agent.agent_PG_e_greedy as ag
+```
