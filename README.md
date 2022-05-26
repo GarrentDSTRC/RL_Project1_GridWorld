@@ -30,3 +30,5 @@ Run main_PG.py with
 import agent.agent_PG as ag
 #import agent.agent_PG_e_greedy as ag
 ```
+## For more information
+Go through my report
