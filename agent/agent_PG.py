@@ -66,7 +66,6 @@ class PolicyGradient():
         action = m.sample()
         return action.item() , m.log_prob(action)
 
-
     def plot_cost(self):
         import matplotlib.pyplot as plt
         plt.plot(np.arange(len(self.cost_his)), self.cost_his)

@@ -23,3 +23,8 @@ Run main_DyPro-v.py with
 chosenAction=agent.policyAction(env.state,epsilon)
 #chosenAction=agent.deterministicPolicy(env.state,epsilon)
 ```
+Include main_DyPro_P_A2C.py,  Agent_DP_p.py, grid_DP_v_nn.py；
+
+To see Policy iteration of Dynamic programming,
+
+Run main_DyPro_P_A2C.py

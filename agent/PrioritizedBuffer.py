@@ -9,7 +9,7 @@ class NaivePrioritizedBuffer(object):
         self.priorities = np.zeros((capacity,), dtype=np.float32)
 
     def push(self, state, action, reward, next_state, done):
-        assert state.ndim == next_state.ndim
+        #assert state.ndim == next_state.ndim
         state      = np.expand_dims(state, 0)
         next_state = np.expand_dims(next_state, 0)
 
@@ -29,6 +29,7 @@ class NaivePrioritizedBuffer(object):
         else:
             prios = self.priorities[:self.pos]
 
+
         probs  = prios ** self.prob_alpha
         probs /= probs.sum()
 
@@ -40,12 +41,14 @@ class NaivePrioritizedBuffer(object):
         weights /= weights.max()
         weights  = np.array(weights, dtype=np.float32)
 
-        batch       = zip(*samples)
+        batch       = list(zip(*samples))
         states      = np.concatenate(batch[0])
         actions     = batch[1]
         rewards     = batch[2]
         next_states = np.concatenate(batch[3])
         dones       = batch[4]
+
+        #print(weights)
 
         return states, actions, rewards, next_states, dones, indices, weights
 
